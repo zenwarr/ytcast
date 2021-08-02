@@ -13,6 +13,6 @@ COPY . /app
 WORKDIR /app
 
 RUN yarn install --frozen-lockfile --production=false && \
-    yarn build-client && yarn build-server
+    yarn build
 
 ENTRYPOINT [ "node", "/app/index.js" ]
