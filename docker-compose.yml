@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: src
+    volumes:
+      - type: volume
+        source: yarn_cache
+        target: /yarn-cache
+      - ./data/secrets/:/secrets
+    ports:
+      - "${PUBLIC_HOST}:${PUBLIC_PORT}:8080"
+    restart: unless-stopped
+    environment:
+      - VIRTUAL_HOST=${PUBLIC_DOMAIN}
+      - PUBLIC_DOMAIN
+      - NODE_ENV
+      - SECRETS_DIR=/secrets
+      - GOOGLE_API_KEY
+    init: true
+    networks:
+      - default
+
+volumes:
+  yarn_cache:
+
+networks:
+  default:
+    external:
+      name: vps-network

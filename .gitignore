@@ -1,0 +1,12 @@
+.idea
+node_modules
+src/static/*.js
+src/static/*.txt
+src/static/*.css
+*.js
+*.js.map
+.env
+data/secrets/*
+!.gitkeep
+!host/webpack.config.js
+host/*.txt
