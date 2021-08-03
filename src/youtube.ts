@@ -14,6 +14,7 @@ export interface VideoInfo {
   description: string;
   pubTs: number;
   thumbnail?: string;
+  duration?: number;
 }
 
 
@@ -37,6 +38,14 @@ async function getPlaylistItems(playlistId: string, token?: string): Promise<Vid
       thumbnail: thumbnail ?? undefined
     };
   }) ?? [];
+
+  const videos = await getExtendedVideoInfo(results.map(r => r.id));
+  for (const item of results) {
+    const extended = videos[item.id];
+    if (extended) {
+      item.duration = extended.duration;
+    }
+  }
 
   const nextPageToken = playlistReply.data.nextPageToken;
   if (nextPageToken) {
@@ -109,5 +118,34 @@ export async function getPlaylist(playlistId: string): Promise<PlaylistInfo> {
     description: playlistReply.data.items?.[0].snippet?.description ?? undefined,
     videos: items,
     imageUrl: thumbnail ?? undefined
+  };
+}
+
+
+export interface ExtendedVideoInfo {
+  duration: number;
+}
+
+
+export type ExtendedVideoInfoMap = { [id: string]: ExtendedVideoInfo };
+
+
+export async function getExtendedVideoInfo(videoIds: string[]): Promise<ExtendedVideoInfoMap> {
+  const reply = await youtube.videos.list({
+    id: videoIds,
+    part: [ "contentDetails" ]
+  });
+
+  const result: ExtendedVideoInfoMap = {};
+  for (const item of reply.data.items ?? []) {
+    if (!item.id || !item.contentDetails) {
+      continue;
+    }
+
+    result[item.id] = {
+      duration: moment.duration(item.contentDetails.duration).asSeconds()
+    };
   }
+
+  return result;
 }

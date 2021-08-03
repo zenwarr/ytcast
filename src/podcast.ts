@@ -80,8 +80,7 @@ function getFeedItemForVideo(video: VideoInfo) {
         _name: "enclosure",
         _attrs: {
           url: `https://${ PUBLIC_DOMAIN }/episodes/${ video.id }`,
-          length: "8727310",
-          type: "audio/x-m4a",
+          type: "audio/mpeg"
         },
       },
       {
@@ -90,9 +89,23 @@ function getFeedItemForVideo(video: VideoInfo) {
       {
         pubDate: moment(video.pubTs).format("ddd, D MMM YYYY kk:mm:ss GMT")
       },
-      // {
-      //   "itunes:duration": "7:04",
-      // }
-    ],
+      video.duration ? {
+        "itunes:duration": formatDuration(moment.duration(video.duration, "second"))
+      } : undefined
+    ].filter(x => x != null),
   };
+}
+
+
+function formatDuration(duration: moment.Duration): string {
+  const hours = formatNumber(duration.hours());
+  const minutes = formatNumber(duration.minutes());
+  const seconds = formatNumber(duration.seconds());
+
+  return [ hours, minutes, seconds ].join(":");
+}
+
+
+function formatNumber(x: number): string {
+  return ("" + x).padStart(2, "0");
 }
