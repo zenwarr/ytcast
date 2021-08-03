@@ -46,7 +46,8 @@ async function getPlaylistItems(playlistId: string, token?: string): Promise<Vid
 }
 
 
-interface ChannelInfo {
+export interface ChannelInfo {
+  id: string;
   title: string;
   description?: string;
   imageUrl?: string;
@@ -72,9 +73,40 @@ export async function getChannel(channelId: string): Promise<ChannelInfo> {
   const thumnail = (thumbnails?.high ?? thumbnails?.default)?.url;
 
   return {
+    id: channelId,
     title: channelReply.data.items?.[0].snippet?.title ?? "<no title>",
     description: channelReply.data.items?.[0].snippet?.description ?? undefined,
     imageUrl: thumnail ?? undefined,
     videos: uploads
   };
+}
+
+
+export interface PlaylistInfo {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  videos: VideoInfo[];
+}
+
+
+export async function getPlaylist(playlistId: string): Promise<PlaylistInfo> {
+  const playlistReply = await youtube.playlists.list({
+    id: [ playlistId ],
+    part: [ "contentDetails", "snippet" ]
+  });
+
+  const items = await getPlaylistItems(playlistId);
+
+  const thumbnails = playlistReply.data.items?.[0].snippet?.thumbnails;
+  const thumbnail = (thumbnails?.high ?? thumbnails?.default)?.url;
+
+  return {
+    id: playlistId,
+    title: playlistReply.data.items?.[0].snippet?.title ?? "<no title>",
+    description: playlistReply.data.items?.[0].snippet?.description ?? undefined,
+    videos: items,
+    imageUrl: thumbnail ?? undefined
+  }
 }
