@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import moment from "moment";
 
 
 const youtube = google.youtube({
@@ -11,7 +12,7 @@ export interface VideoInfo {
   id: string;
   title: string;
   description: string;
-  pubDate: Date;
+  pubTs: number;
   thumbnail?: string;
 }
 
@@ -32,7 +33,7 @@ async function getPlaylistItems(playlistId: string, token?: string): Promise<Vid
       id: item.snippet?.resourceId?.videoId!,
       title: item.snippet?.title!,
       description: item.snippet?.description!,
-      pubDate: new Date(item.snippet?.publishedAt!),
+      pubTs: moment(item.snippet?.publishedAt!).valueOf(),
       thumbnail: thumbnail ?? undefined
     };
   }) ?? [];

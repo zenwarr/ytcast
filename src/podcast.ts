@@ -1,5 +1,6 @@
 import { ChannelInfo, PlaylistInfo, VideoInfo } from "./youtube";
 import { toXML } from "jstoxml";
+import moment from "moment";
 
 
 const PUBLIC_DOMAIN = process.env["PUBLIC_DOMAIN"];
@@ -86,9 +87,9 @@ function getFeedItemForVideo(video: VideoInfo) {
       {
         guid: `https://${ PUBLIC_DOMAIN }/episodes/${ video.id }`,
       },
-      // {
-      //   pubDate: "Wed, 15 Jun 2011 19:00:00 GMT",
-      // },
+      {
+        pubDate: moment(video.pubTs).format("ddd, D MMM YYYY kk:mm:ss GMT")
+      },
       // {
       //   "itunes:duration": "7:04",
       // }
