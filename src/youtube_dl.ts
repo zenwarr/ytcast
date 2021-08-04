@@ -8,6 +8,8 @@ export interface Stream {
   hasAudio: boolean;
   hasVideo: boolean;
   fileSize?: number;
+  audioBitrate?: number;
+  protocol?: string;
 }
 
 
@@ -43,6 +45,8 @@ export async function getVideoInfo(videoUrl: string): Promise<VideoInfo> {
         hasAudio: format.acodec !== "none",
         hasVideo: format.vcodec !== "none",
         fileSize: format.filesize ?? undefined,
+        audioBitrate: Math.round(format.abr ?? format.tbr),
+        protocol: format.protocol
       };
     })
   };
@@ -51,7 +55,8 @@ export async function getVideoInfo(videoUrl: string): Promise<VideoInfo> {
 
 export async function getStream(videoUrl: string): Promise<Stream | undefined> {
   const streamInfo = await getVideoInfo(videoUrl);
-  const streams = streamInfo.streams.filter(f => !f.hasVideo && f.hasAudio);
+  const streams = streamInfo.streams.filter(f => !f.hasVideo && f.hasAudio && (f.protocol == null || f.protocol === "https"));
+  streams.sort((a, b) => (b.audioBitrate ?? 0) - (a.audioBitrate ?? 0));
   return streams[0];
 }
 

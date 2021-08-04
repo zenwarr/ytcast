@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { toXML } from "jstoxml";
-import { getChannel, getPlaylist, VideoInfo } from "./youtube";
+import { getChannel, getLiveStreamsForChannel, getPlaylist, VideoInfo } from "./youtube";
 import { getStream } from "./youtube_dl";
 import got from "got";
 import { getFeedXmlForChannel, getFeedXmlForPlaylist } from "./podcast";
@@ -47,6 +47,14 @@ export default async function initRoutes(app: FastifyInstance) {
         "range": req.headers.range
       }
     });
+  });
+
+
+  app.get<{
+    Params: { channelId: string }
+  }>("/live/:channelId", async req => {
+    const streams = await getLiveStreamsForChannel(req.params.channelId);
+    return streams;
   });
 
 
