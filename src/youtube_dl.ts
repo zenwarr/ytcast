@@ -2,6 +2,7 @@ import * as childProcess from "child_process";
 
 
 export interface Stream {
+  formatId: number;
   url: string;
   mimeType: string;
   videoWidth?: number;
@@ -18,9 +19,11 @@ export interface VideoInfo {
 }
 
 
-async function getOutput(cmd: string): Promise<string> {
+export async function getOutput(cmd: string): Promise<string> {
   return new Promise<string>((resolve, reject) => {
-    childProcess.exec(cmd, (err, stdout, stderr) => {
+    childProcess.exec(cmd, {
+      maxBuffer: 1024 * 1024 * 32
+    }, (err, stdout, stderr) => {
       if (err != null) {
         reject(err);
       } else {
@@ -39,6 +42,7 @@ export async function getVideoInfo(videoUrl: string): Promise<VideoInfo> {
     streams: formats.map((format: any) => {
       const mimeType = format.vcodec !== "none" ? "video/" + format.ext : "audio/" + format.ext;
       return {
+        formatId: format.format_id,
         url: format.url,
         mimeType,
         videoWidth: format.width,
@@ -55,8 +59,14 @@ export async function getVideoInfo(videoUrl: string): Promise<VideoInfo> {
 
 export async function getStream(videoUrl: string): Promise<Stream | undefined> {
   const streamInfo = await getVideoInfo(videoUrl);
-  const streams = streamInfo.streams.filter(f => !f.hasVideo && f.hasAudio && (f.protocol == null || f.protocol === "https"));
-  streams.sort((a, b) => (b.audioBitrate ?? 0) - (a.audioBitrate ?? 0));
+  const streams = streamInfo.streams.filter(f => !f.hasVideo && f.hasAudio);
+  streams.sort((a, b) => {
+    if (b.protocol === "https" && a.protocol !== "https") {
+      return 1;
+    } else {
+      return (b.audioBitrate ?? 0) - (a.audioBitrate ?? 0)
+    }
+  });
   return streams[0];
 }
 
