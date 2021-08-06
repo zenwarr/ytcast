@@ -29,9 +29,20 @@ const EPISODE_STREAM_CACHE: {
 } = {};
 
 
+function getCachedStream(episodeId: string) {
+  const cached = EPISODE_STREAM_CACHE[episodeId];
+  if (!cached || (cached.expire != null && cached.expire.valueOf() <= new Date().valueOf())) {
+    return undefined;
+  } else {
+    return cached;
+  }
+}
+
+
 export async function getStreamForEpisode(episodeId: string) {
-  if (episodeId in EPISODE_STREAM_CACHE) {
-    return EPISODE_STREAM_CACHE[episodeId];
+  const cached = getCachedStream(episodeId);
+  if (cached) {
+    return cached;
   } else {
     const stream = await getStream(`https://youtube.com/watch?v=${ episodeId }`);
     EPISODE_STREAM_CACHE[episodeId] = stream;

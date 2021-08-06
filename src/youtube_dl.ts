@@ -11,6 +11,7 @@ export interface Stream {
   fileSize?: number;
   audioBitrate?: number;
   protocol?: string;
+  expire?: Date;
 }
 
 
@@ -50,10 +51,34 @@ export async function getVideoInfo(videoUrl: string): Promise<VideoInfo> {
         hasVideo: format.vcodec !== "none",
         fileSize: format.filesize ?? undefined,
         audioBitrate: Math.round(format.abr ?? format.tbr),
-        protocol: format.protocol
+        protocol: format.protocol,
+        expire: getExpireDateFromUrl(format.url)
       };
     })
   };
+}
+
+
+function getExpireDateFromUrl(streamUrl: string): Date | undefined {
+  const parsed = new URL(streamUrl);
+  if (parsed.hostname === "manifest.googlevideo.com") {
+    const parts = parsed.pathname.split("/").filter(x => x !== "");
+    const expireTs = parts[4];
+    if (!expireTs || isNaN(+expireTs)) {
+      return undefined;
+    }
+
+    return new Date(+expireTs * 1000);
+  } else if (parsed.hostname.endsWith(".googlevideo.com")) {
+    const expireTs = parsed.searchParams.get("expire");
+    if (!expireTs || isNaN(+expireTs)) {
+      return undefined;
+    }
+
+    return new Date(+expireTs * 1000);
+  } else {
+    return undefined;
+  }
 }
 
 
