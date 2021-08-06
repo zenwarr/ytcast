@@ -1,10 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { toXML } from "jstoxml";
-import { getChannel, getLiveStreamsForChannel, getPlaylist, VideoInfo } from "./youtube";
-import { getStream } from "./youtube_dl";
+import { getChannel, getLiveStreamsForChannel, getPlaylist } from "./youtube";
 import got from "got";
 import { getFeedXmlForChannel, getFeedXmlForPlaylist } from "./podcast";
-import { getDownloadedEpisodeFile, getStreamForEpisode } from "./download_cache";
+import { getStreamForEpisode } from "./download_cache";
+
+
+const USE_REDIRECT = true;
 
 
 export default async function initRoutes(app: FastifyInstance) {
@@ -32,8 +33,8 @@ export default async function initRoutes(app: FastifyInstance) {
 
   app.get<{
     Params: { episodeId: string }
-  }>("/episodes/:episodeId", async req => {
-    const stream = await getStreamForEpisode(req.params.episodeId)
+  }>("/episodes/:episodeId", async (req, res) => {
+    const stream = await getStreamForEpisode(req.params.episodeId);
     if (!stream) {
       throw new Error("Episode not found");
     }
@@ -44,14 +45,18 @@ export default async function initRoutes(app: FastifyInstance) {
       // console.log(downloadedFile);
       // throw new Error("Method not implemented"); // todo
     } else {
-      return got.stream.get(stream.url, {
-        headers: {
-          "user-agent": req.headers["user-agent"],
-          "accept": req.headers.accept,
-          "accept-language": req.headers["accept-language"],
-          "range": req.headers.range
-        }
-      });
+      if (USE_REDIRECT) {
+        res.redirect(302, stream.url);
+      } else {
+        return got.stream.get(stream.url, {
+          headers: {
+            "user-agent": req.headers["user-agent"],
+            "accept": req.headers.accept,
+            "accept-language": req.headers["accept-language"],
+            "range": req.headers.range
+          }
+        });
+      }
     }
   });
 
