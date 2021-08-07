@@ -1,5 +1,6 @@
 import fastify from "fastify";
 import { LogicError, getStatusCodeForError, ErrorCode, DEFAULT_ERROR_STATUS_CODE } from "./errors";
+import { startLiveRecorder } from "./youtube_live";
 
 
 async function startApp() {
@@ -32,6 +33,8 @@ async function startApp() {
   const port = process.env["PORT"] ?? 8080;
   await app.listen(port, "0.0.0.0");
   console.log("Application listening on port", port);
+
+  startLiveRecorder();
 }
 
 

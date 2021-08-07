@@ -149,18 +149,3 @@ export async function getExtendedVideoInfo(videoIds: string[]): Promise<Extended
 
   return result;
 }
-
-
-export interface LiveStreamInfo {
-  videoId: string;
-}
-
-
-export async function getLiveStreamsForChannel(channelId: string): Promise<any> {
-  return (await youtube.search.list({
-    channelId,
-    part: [ "snippet" ],
-    type: [ "video" ],
-    eventType: "live"
-  })).data;
-}

@@ -2,7 +2,7 @@ import * as childProcess from "child_process";
 
 
 export interface Stream {
-  formatId: number;
+  formatId: string;
   url: string;
   mimeType: string;
   videoWidth?: number;
@@ -35,7 +35,20 @@ export async function getOutput(cmd: string): Promise<string> {
 }
 
 
-export async function getVideoInfo(videoUrl: string): Promise<VideoInfo> {
+export function downloadStream(videoId: string, formatId: string, fileName: string): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const proc = childProcess.spawn(`youtube-dl --format=${ formatId } --output=${ fileName } https://youtube.com/watch?v=${ videoId }`, {
+      stdio: "inherit",
+      shell: true
+    });
+    proc.on("close", resolve);
+    proc.on("error", reject);
+  });
+}
+
+
+export async function getVideoInfo(videoId: string): Promise<VideoInfo> {
+  const videoUrl = `https://youtube.com/watch?v=${ videoId }`;
   const output = JSON.parse(await getOutput(`youtube-dl --dump-json ${ videoUrl }`));
   const formats = output.formats;
 
@@ -82,14 +95,14 @@ function getExpireDateFromUrl(streamUrl: string): Date | undefined {
 }
 
 
-export async function getStream(videoUrl: string): Promise<Stream | undefined> {
-  const streamInfo = await getVideoInfo(videoUrl);
+export async function getStream(videoId: string): Promise<Stream | undefined> {
+  const streamInfo = await getVideoInfo(videoId);
   const streams = streamInfo.streams.filter(f => !f.hasVideo && f.hasAudio);
   streams.sort((a, b) => {
     if (b.protocol === "https" && a.protocol !== "https") {
       return 1;
     } else {
-      return (b.audioBitrate ?? 0) - (a.audioBitrate ?? 0)
+      return (b.audioBitrate ?? 0) - (a.audioBitrate ?? 0);
     }
   });
   return streams[0];

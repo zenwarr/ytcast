@@ -44,7 +44,7 @@ export async function getStreamForEpisode(episodeId: string) {
   if (cached) {
     return cached;
   } else {
-    const stream = await getStream(`https://youtube.com/watch?v=${ episodeId }`);
+    const stream = await getStream(episodeId);
     EPISODE_STREAM_CACHE[episodeId] = stream;
     return stream;
   }

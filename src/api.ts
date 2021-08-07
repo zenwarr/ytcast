@@ -1,8 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { getChannel, getLiveStreamsForChannel, getPlaylist } from "./youtube";
+import { getChannel, getPlaylist } from "./youtube";
 import got from "got";
 import { getFeedXmlForChannel, getFeedXmlForPlaylist } from "./podcast";
 import { getStreamForEpisode } from "./download_cache";
+import { LIVE_RECORDINGS } from "./youtube_live";
 
 
 const USE_REDIRECT = true;
@@ -61,11 +62,8 @@ export default async function initRoutes(app: FastifyInstance) {
   });
 
 
-  app.get<{
-    Params: { channelId: string }
-  }>("/live/:channelId", async req => {
-    const streams = await getLiveStreamsForChannel(req.params.channelId);
-    return streams;
+  app.get("/live_recordings", async req => {
+    return LIVE_RECORDINGS;
   });
 
 
