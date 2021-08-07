@@ -162,7 +162,7 @@ async function startRecording(channelId: string, videoId: string): Promise<void>
 }
 
 
-const BEST_VIDEO_WIDTH = 1290;
+const BEST_VIDEO_WIDTH = 1280;
 
 
 function chooseBestStreamForRecording(videoInfo: VideoInfo): Stream | undefined {
@@ -173,7 +173,11 @@ function chooseBestStreamForRecording(videoInfo: VideoInfo): Stream | undefined 
 
   const sorted = [ ...videoInfo.streams ]
   .filter(x => x.videoWidth != null)
-  .sort((a, b) => Math.abs((b.videoWidth ?? 0) - (a.videoWidth ?? 0)));
+  .sort((a, b) => {
+    const aDiff = Math.abs((a.videoWidth ?? 0) - BEST_VIDEO_WIDTH);
+    const bDiff = Math.abs((b.videoWidth ?? 0) - BEST_VIDEO_WIDTH);
+    return aDiff - bDiff;
+  });
 
   return sorted[0];
 }
