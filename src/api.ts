@@ -6,7 +6,7 @@ import { getStreamForEpisode } from "./download_cache";
 import { LIVE_RECORDINGS } from "./youtube_live";
 
 
-const USE_REDIRECT = true;
+const USE_REDIRECT = false;
 
 
 export default async function initRoutes(app: FastifyInstance) {
