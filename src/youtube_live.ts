@@ -136,10 +136,11 @@ async function startRecording(channelId: string, videoId: string): Promise<void>
 
   await fs.promises.mkdir(path.join(SECRETS_DIR, "live_recordings"), { recursive: true });
 
+  const fileName = `${ videoId }-${ new Date().toISOString().replace(/[\:\.]/g, "_") }.mp4`;
   const recording: LiveRecording = {
     channelId,
     videoId,
-    file: path.join(SECRETS_DIR, "live_recordings", `${ videoId }.mp4`),
+    file: path.join(SECRETS_DIR, "live_recordings", fileName),
     startTs: new Date()
   };
   LIVE_RECORDINGS.push(recording);
