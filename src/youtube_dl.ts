@@ -102,7 +102,7 @@ export async function getStream(videoId: string): Promise<Stream | undefined> {
     if (b.protocol === "https" && a.protocol !== "https") {
       return 1;
     } else {
-      return (b.audioBitrate ?? 0) - (a.audioBitrate ?? 0);
+      return (a.audioBitrate ?? 0) - (b.audioBitrate ?? 0);
     }
   });
   return streams[0];
