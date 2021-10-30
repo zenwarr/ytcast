@@ -95,16 +95,13 @@ function getExpireDateFromUrl(streamUrl: string): Date | undefined {
 }
 
 
+const ALLOWED_PROTOCOLS = [ "http", "https" ];
+
+
 export async function getStream(videoId: string): Promise<Stream | undefined> {
   const streamInfo = await getVideoInfo(videoId);
-  const streams = streamInfo.streams.filter(f => !f.hasVideo && f.hasAudio);
-  streams.sort((a, b) => {
-    if (b.protocol === "https" && a.protocol !== "https") {
-      return 1;
-    } else {
-      return (b.audioBitrate ?? 0) - (a.audioBitrate ?? 0);
-    }
-  });
+  const streams = streamInfo.streams.filter(f => !f.hasVideo && f.hasAudio && f.protocol != null && ALLOWED_PROTOCOLS.includes(f.protocol));
+  streams.sort((a, b) => (a.audioBitrate ?? 0) - (b.audioBitrate ?? 0));
   return streams[0];
 }
 
