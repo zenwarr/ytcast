@@ -101,7 +101,7 @@ const ALLOWED_PROTOCOLS = [ "http", "https" ];
 export async function getStream(videoId: string): Promise<Stream | undefined> {
   const streamInfo = await getVideoInfo(videoId);
   const streams = streamInfo.streams.filter(f => !f.hasVideo && f.hasAudio && f.protocol != null && ALLOWED_PROTOCOLS.includes(f.protocol));
-  streams.sort((a, b) => (a.audioBitrate ?? 0) - (b.audioBitrate ?? 0));
+  streams.sort((a, b) => (b.audioBitrate ?? 0) - (a.audioBitrate ?? 0));
   return streams[0];
 }
 
