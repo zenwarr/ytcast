@@ -37,7 +37,7 @@ export async function getOutput(cmd: string): Promise<string> {
 
 export function downloadStream(videoId: string, formatId: string, fileName: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const proc = childProcess.spawn(`youtube-dl --format=${ formatId } --output=${ fileName } https://youtube.com/watch?v=${ videoId }`, {
+    const proc = childProcess.spawn(`yt-dlp --format=${ formatId } --output=${ fileName } https://youtube.com/watch?v=${ videoId }`, {
       stdio: "inherit",
       shell: true
     });
@@ -49,7 +49,7 @@ export function downloadStream(videoId: string, formatId: string, fileName: stri
 
 export async function getVideoInfo(videoId: string): Promise<VideoInfo> {
   const videoUrl = `https://youtube.com/watch?v=${ videoId }`;
-  const output = JSON.parse(await getOutput(`youtube-dl --dump-json ${ videoUrl }`));
+  const output = JSON.parse(await getOutput(`yt-dlp --dump-json ${ videoUrl }`));
   const formats = output.formats;
 
   return {
@@ -109,4 +109,4 @@ export async function getStream(videoId: string): Promise<Stream | undefined> {
 }
 
 
-getOutput("youtube-dl --version").then(version => console.log("youtube-dl version: " + version));
+getOutput("yt-dlp --version").then(version => console.log("yt-dlp version: " + version));

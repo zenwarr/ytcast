@@ -15,7 +15,7 @@ export async function getDownloadedEpisodeFile(episodeId: string, stream: Stream
     return DOWNLOADED_CACHE[url];
   } else {
     const downloadFilePath = path.join(os.tmpdir(), `${ episodeId }`);
-    let cmd = `youtube-dl --format=${ stream.formatId } --output=${ downloadFilePath } https://youtube.com/watch?v=${ episodeId }`;
+    let cmd = `yt-dlp --format=${ stream.formatId } --output=${ downloadFilePath } https://youtube.com/watch?v=${ episodeId }`;
     console.log("downloading episode", cmd);
     const output = await getOutput(cmd);
     console.log(output);
