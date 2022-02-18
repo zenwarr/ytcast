@@ -4,32 +4,6 @@ services:
   app:
     build:
       dockerfile: dev.Dockerfile
-    environment:
-      - SELF_SIGNED_HOST=${PUBLIC_DOMAIN}
     volumes:
       - ./src:/app
     restart: "no"
-
-  nginx-proxy:
-    image: nginxproxy/nginx-proxy:0.9.1-alpine
-    ports:
-      - "${PUBLIC_HOST}:443:443"
-      - "${PUBLIC_HOST}:80:80"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - generated_certs:/etc/nginx/certs
-    environment:
-      - DEFAULT_HOST=${PUBLIC_DOMAIN}
-    depends_on:
-      - app
-
-  nginx-proxy-certs:
-    image: sebastienheyd/self-signed-proxy-companion
-    environment:
-      - NGINX_PROXY_CONTAINER=nginx-proxy
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - generated_certs:/etc/nginx/certs
-
-volumes:
-  generated_certs:

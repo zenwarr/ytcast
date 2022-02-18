@@ -9,23 +9,22 @@ services:
         source: yarn_cache
         target: /yarn-cache
       - ./data/secrets/:/secrets
-    ports:
-      - "${PUBLIC_HOST}:${PUBLIC_PORT}:8080"
     restart: unless-stopped
     environment:
-      - VIRTUAL_HOST=${PUBLIC_DOMAIN}
-      - PUBLIC_DOMAIN
       - NODE_ENV
       - SECRETS_DIR=/secrets
       - GOOGLE_API_KEY
+    labels:
+      - "traefik.http.routers.ytcast.rule=Host(\"${PUBLIC_DOMAIN}\")"
+      - "traefik.http.services.ytcast.loadbalancer.server.port=8080"
     init: true
     networks:
-      - default
+      - traefik
 
 volumes:
   yarn_cache:
 
 networks:
-  default:
+  traefik:
     external:
-      name: vps-network
+      name: traefik
