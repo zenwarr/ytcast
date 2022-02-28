@@ -14,6 +14,7 @@ services:
       - NODE_ENV
       - SECRETS_DIR=/secrets
       - GOOGLE_API_KEY
+      - PUBLIC_DOMAIN
     labels:
       - "traefik.http.routers.ytcast.rule=Host(\"${PUBLIC_DOMAIN}\")"
       - "traefik.http.services.ytcast.loadbalancer.server.port=8080"
