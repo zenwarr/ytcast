@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { FastifyInstance } from "fastify";
 import { getChannel, getPlaylist } from "./youtube";
 import { getFeedXmlForChannel, getFeedXmlForPlaylist } from "./podcast";
-import { downloadEpisode, getMimeTypeFromFilename, getStreamForEpisode } from "./download_cache";
+import { downloadEpisode, getMimeTypeFromFilename, getStreamForEpisode } from "./download";
 import { LIVE_RECORDINGS } from "./youtube_live";
 
 
@@ -39,6 +39,7 @@ export default async function initRoutes(app: FastifyInstance) {
 
     res.header("content-type", getMimeTypeFromFilename(filePath));
     res.header("content-length", (await fs.promises.stat(filePath)).size);
+
     return fs.createReadStream(filePath);
   });
 

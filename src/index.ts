@@ -1,8 +1,5 @@
 import fastify from "fastify";
-import path from "path";
-import os from "os";
-import fastifyStatic from "fastify-static";
-import { initDownloadCache } from "./download_cache";
+import { initDownloadCache, startOptimizeCache } from "./download";
 import { LogicError, getStatusCodeForError, ErrorCode, DEFAULT_ERROR_STATUS_CODE } from "./errors";
 import { startLiveRecorder } from "./youtube_live";
 
@@ -32,14 +29,6 @@ async function startApp() {
 
 
   app.register(require("./api"));
-  app.register(fastifyStatic, {
-    root: [ path.join(__dirname, "static") ],
-    prefix: "/static",
-    allowedPath: (p: string, root: string | undefined) => {
-      console.log("checking path", p, root);
-      return p.startsWith(os.tmpdir() + "/");
-    }
-  });
 
 
   const port = process.env["PORT"] ?? 8080;
@@ -48,6 +37,7 @@ async function startApp() {
 
   await initDownloadCache();
   startLiveRecorder();
+  startOptimizeCache();
 }
 
 
