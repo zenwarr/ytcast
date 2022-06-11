@@ -38,6 +38,7 @@ export default async function initRoutes(app: FastifyInstance) {
     }
 
     res.header("content-type", getMimeTypeFromFilename(filePath));
+    res.header("content-length", (await fs.promises.stat(filePath)).size);
     return fs.createReadStream(filePath);
   });
 
