@@ -34,7 +34,22 @@ export async function initDownloadCache() {
 }
 
 
+const pendingDownloads: {
+  [episodeId: string]: Promise<string | undefined>
+} = {};
+
+
 export async function downloadEpisode(episodeId: string) {
+  const downloadPromise = pendingDownloads[episodeId];
+  if (downloadPromise) {
+    return downloadPromise;
+  } else {
+    return pendingDownloads[episodeId] = downloadEpisodeInternal(episodeId);
+  }
+}
+
+
+async function downloadEpisodeInternal(episodeId: string): Promise<string | undefined> {
   if (episodeId in DOWNLOADED_CACHE) {
     return DOWNLOADED_CACHE[episodeId];
   } else {
