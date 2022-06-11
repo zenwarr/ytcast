@@ -1,12 +1,9 @@
+import * as fs from "fs";
 import { FastifyInstance } from "fastify";
 import { getChannel, getPlaylist } from "./youtube";
-import got from "got";
 import { getFeedXmlForChannel, getFeedXmlForPlaylist } from "./podcast";
-import { getStreamForEpisode } from "./download_cache";
+import { getDownloadedEpisodeFile, getStreamForEpisode } from "./download_cache";
 import { LIVE_RECORDINGS } from "./youtube_live";
-
-
-const USE_REDIRECT = false;
 
 
 export default async function initRoutes(app: FastifyInstance) {
@@ -40,25 +37,10 @@ export default async function initRoutes(app: FastifyInstance) {
       throw new Error("Episode not found");
     }
 
-    if (stream.protocol === "http_dash_segments") {
-      throw new Error("Method not implemented"); // todo
-      // const downloadedFile = await getDownloadedEpisodeFile(req.params.episodeId, stream);
-      // console.log(downloadedFile);
-      // throw new Error("Method not implemented"); // todo
-    } else {
-      if (USE_REDIRECT) {
-        res.redirect(302, stream.url);
-      } else {
-        return got.stream.get(stream.url, {
-          headers: {
-            "user-agent": req.headers["user-agent"],
-            "accept": req.headers.accept,
-            "accept-language": req.headers["accept-language"],
-            "range": req.headers.range
-          }
-        });
-      }
-    }
+    res.header("Content-Type", "audio/ogg");
+
+    const filePath = await getDownloadedEpisodeFile(req.params.episodeId, stream);
+    return fs.createReadStream(filePath);
   });
 
 
@@ -67,7 +49,7 @@ export default async function initRoutes(app: FastifyInstance) {
   });
 
 
-  app.get("/", async req => {
+  app.get("/", async () => {
     return "hello, this is yt-cast!";
   });
 }

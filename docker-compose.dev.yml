@@ -3,7 +3,10 @@ version: "3.7"
 services:
   app:
     build:
+      context: src
       dockerfile: dev.Dockerfile
     volumes:
       - ./src:/app
     restart: "no"
+    ports:
+      - "80:8080"

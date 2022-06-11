@@ -1,4 +1,5 @@
 import * as childProcess from "child_process";
+import * as url from "url";
 
 
 export interface Stream {
@@ -73,7 +74,7 @@ export async function getVideoInfo(videoId: string): Promise<VideoInfo> {
 
 
 function getExpireDateFromUrl(streamUrl: string): Date | undefined {
-  const parsed = new URL(streamUrl);
+  const parsed = new url.URL(streamUrl);
   if (parsed.hostname === "manifest.googlevideo.com") {
     const parts = parsed.pathname.split("/").filter(x => x !== "");
     const expireTs = parts[4];
