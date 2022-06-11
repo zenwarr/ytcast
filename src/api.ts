@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { FastifyInstance } from "fastify";
 import { getChannel, getPlaylist } from "./youtube";
 import { getFeedXmlForChannel, getFeedXmlForPlaylist } from "./podcast";
-import { getDownloadedEpisodeFile, getStreamForEpisode } from "./download_cache";
+import { downloadEpisode, getMimeTypeFromFilename, getStreamForEpisode } from "./download_cache";
 import { LIVE_RECORDINGS } from "./youtube_live";
 
 
@@ -32,14 +32,12 @@ export default async function initRoutes(app: FastifyInstance) {
   app.get<{
     Params: { episodeId: string }
   }>("/episodes/:episodeId", async (req, res) => {
-    const stream = await getStreamForEpisode(req.params.episodeId);
-    if (!stream) {
-      throw new Error("Episode not found");
+    const filePath = await downloadEpisode(req.params.episodeId);
+    if (!filePath) {
+      throw new Error(`episode ${ req.params.episodeId } not found`);
     }
 
-    res.header("Content-Type", "audio/ogg");
-
-    const filePath = await getDownloadedEpisodeFile(req.params.episodeId, stream);
+    res.header("content-type", getMimeTypeFromFilename(filePath));
     return fs.createReadStream(filePath);
   });
 

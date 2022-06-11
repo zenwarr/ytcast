@@ -9,18 +9,20 @@ const DOWNLOADED_CACHE: {
 } = {};
 
 
-export async function initDownloadCache() {
-  const cacheDir = os.tmpdir();
+const CACHE_DIR = os.tmpdir();
+const IGNORE_EXTS = [ ".part" ];
 
+
+export async function initDownloadCache() {
   // enumerate files in cache directory
-  const files = await fs.promises.readdir(cacheDir);
+  const files = await fs.promises.readdir(CACHE_DIR);
   for (const file of files) {
-    const filePath = path.join(cacheDir, file);
+    const filePath = path.join(CACHE_DIR, file);
 
     // get extension and file name without extension
     const ext = path.extname(file);
     const episodeId = path.basename(file, ext);
-    if (ext == ".part") {
+    if (IGNORE_EXTS.includes(ext)) {
       continue;
     }
 
@@ -29,47 +31,76 @@ export async function initDownloadCache() {
       DOWNLOADED_CACHE[episodeId] = filePath;
     }
   }
-
-  console.log(DOWNLOADED_CACHE);
 }
 
 
-export async function getDownloadedEpisodeFile(episodeId: string, stream: Stream) {
+export async function downloadEpisode(episodeId: string) {
   if (episodeId in DOWNLOADED_CACHE) {
     return DOWNLOADED_CACHE[episodeId];
   } else {
-    const downloadFilePath = path.join(os.tmpdir(), `${ episodeId }`) + ".ogg";
-    let cmd = `yt-dlp --format=${ stream.formatId } --output=${ downloadFilePath } https://youtube.com/watch?v=${ episodeId }`;
+    const downloadFilePath = path.join(CACHE_DIR, `${ episodeId }`) + ".%(ext)s";
+    let cmd = `yt-dlp -x --output="${ downloadFilePath }" https://youtube.com/watch?v=${ episodeId }`;
     console.log("downloading episode", cmd);
     const output = await getOutput(cmd);
     console.log(output);
-    return downloadFilePath;
+    return findFileWithName(CACHE_DIR, episodeId);
   }
 }
 
 
-const EPISODE_STREAM_CACHE: {
-  [videoId: string]: Stream | undefined
-} = {};
+async function findFileWithName(dir: string, name: string): Promise<string | undefined> {
+  const files = await fs.promises.readdir(dir);
+  for (const file of files) {
+    if (file.startsWith(name + ".") && !IGNORE_EXTS.includes(path.extname(file))) {
+      return path.join(dir, file);
+    }
+  }
+
+  return undefined;
+}
 
 
-function getCachedStream(episodeId: string) {
-  const cached = EPISODE_STREAM_CACHE[episodeId];
-  if (!cached || (cached.expire != null && cached.expire.valueOf() <= new Date().valueOf())) {
-    return undefined;
-  } else {
-    return cached;
+export function getMimeTypeFromFilename(filename: string) {
+  const ext = path.extname(filename);
+  switch (ext) {
+    case ".mp3":
+      return "audio/mpeg";
+    case ".mp4":
+      return "video/mp4";
+    case ".m4a":
+      return "audio/mp4";
+    case ".opus":
+      return "audio/opus";
+    case ".webm":
+      return "video/webm";
+    default:
+      return "audio/mpeg";
   }
 }
 
 
-export async function getStreamForEpisode(episodeId: string) {
-  const cached = getCachedStream(episodeId);
-  if (cached) {
-    return cached;
-  } else {
-    const stream = await getStream(episodeId);
-    EPISODE_STREAM_CACHE[episodeId] = stream;
-    return stream;
+  const EPISODE_STREAM_CACHE: {
+    [videoId: string]: Stream | undefined
+  } = {};
+
+
+  function getCachedStream(episodeId: string) {
+    const cached = EPISODE_STREAM_CACHE[episodeId];
+    if (!cached || (cached.expire != null && cached.expire.valueOf() <= new Date().valueOf())) {
+      return undefined;
+    } else {
+      return cached;
+    }
   }
-}
+
+
+  export async function getStreamForEpisode(episodeId: string) {
+    const cached = getCachedStream(episodeId);
+    if (cached) {
+      return cached;
+    } else {
+      const stream = await getStream(episodeId);
+      EPISODE_STREAM_CACHE[episodeId] = stream;
+      return stream;
+    }
+  }
