@@ -38,7 +38,7 @@ export async function getOutput(cmd: string): Promise<string> {
 
 export function downloadStream(videoId: string, formatId: string, fileName: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const proc = childProcess.spawn(`yt-dlp --format=${ formatId } --output=${ fileName } https://youtube.com/watch?v=${ videoId }`, {
+    const proc = childProcess.spawn(`yt-dlp --quiet --format=${ formatId } --output=${ fileName } https://youtube.com/watch?v=${ videoId }`, {
       stdio: "inherit",
       shell: true
     });
