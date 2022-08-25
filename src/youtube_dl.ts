@@ -19,9 +19,6 @@ export interface VideoInfo {
 }
 
 
-const REMOVE_SPONSORBLOCK_CATEGORIES: string | undefined = process.env["REMOVE_SPONSORBLOCK_CATEGORIES"];
-
-
 export async function getOutput(cmd: string): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     childProcess.exec(cmd, {
@@ -39,11 +36,7 @@ export async function getOutput(cmd: string): Promise<string> {
 
 export function downloadStream(videoId: string, formatId: string, fileName: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    let command = `yt-dlp --quiet --format=${ formatId } --output=${ fileName }`;
-    if (REMOVE_SPONSORBLOCK_CATEGORIES) {
-      command += ` --sponsorblock-remove="${ REMOVE_SPONSORBLOCK_CATEGORIES }" `;
-    }
-    command += ` https://youtube.com/watch?v=${ videoId }`;
+    let command = `yt-dlp --quiet --format=${ formatId } --output=${ fileName } --live-from-start https://youtube.com/watch?v=${ videoId }`;
     const proc = childProcess.spawn(command, {
       stdio: "inherit",
       shell: true

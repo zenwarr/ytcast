@@ -16,6 +16,8 @@ const IGNORE_EXTS = [ ".part" ];
 const MAX_CACHE_SIZE = 1024 * 1024 * 1024 * 4; // 4gb
 const MAX_CACHE_AGE_IN_DAYS = 4;
 
+const REMOVE_SPONSORBLOCK_CATEGORIES: string | undefined = process.env["REMOVE_SPONSORBLOCK_CATEGORIES"];
+
 
 export async function initDownloadCache() {
   // enumerate files in cache directory
@@ -58,7 +60,11 @@ async function downloadEpisodeInternal(episodeId: string): Promise<string | unde
     return DOWNLOADED_CACHE[episodeId];
   } else {
     const downloadFilePath = path.join(CACHE_DIR, `${ episodeId }`) + ".%(ext)s";
-    let cmd = `yt-dlp -x --output="${ downloadFilePath }" https://youtube.com/watch?v=${ episodeId }`;
+    let cmd = `yt-dlp -x --output="${ downloadFilePath }" `;
+    if (REMOVE_SPONSORBLOCK_CATEGORIES) {
+      cmd += ` --sponsorblock-remove="${ REMOVE_SPONSORBLOCK_CATEGORIES }" `;
+    }
+    cmd += ` https://youtube.com/watch?v=${ episodeId }`;
     console.log("downloading episode", cmd);
     const output = await getOutput(cmd);
     console.log(output);
