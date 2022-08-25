@@ -2,7 +2,7 @@ import * as date from "date-fns";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { getOutput, getStream, Stream } from "./youtube_dl";
+import { getOutput, Stream } from "./youtube_dl";
 
 
 const DOWNLOADED_CACHE: {
@@ -94,33 +94,6 @@ export function getMimeTypeFromFilename(filename: string) {
       return "video/webm";
     default:
       return "audio/mpeg";
-  }
-}
-
-
-const EPISODE_STREAM_CACHE: {
-  [videoId: string]: Stream | undefined
-} = {};
-
-
-function getCachedStream(episodeId: string) {
-  const cached = EPISODE_STREAM_CACHE[episodeId];
-  if (!cached || (cached.expire != null && cached.expire.valueOf() <= new Date().valueOf())) {
-    return undefined;
-  } else {
-    return cached;
-  }
-}
-
-
-export async function getStreamForEpisode(episodeId: string) {
-  const cached = getCachedStream(episodeId);
-  if (cached) {
-    return cached;
-  } else {
-    const stream = await getStream(episodeId);
-    EPISODE_STREAM_CACHE[episodeId] = stream;
-    return stream;
   }
 }
 

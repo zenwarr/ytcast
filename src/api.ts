@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { FastifyInstance } from "fastify";
 import { getChannel, getPlaylist } from "./youtube";
 import { getFeedXmlForChannel, getFeedXmlForPlaylist } from "./podcast";
-import { downloadEpisode, getMimeTypeFromFilename, getStreamForEpisode } from "./download";
+import { downloadEpisode, getMimeTypeFromFilename } from "./download";
 import { LIVE_RECORDINGS } from "./youtube_live";
 
 

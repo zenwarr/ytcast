@@ -1,5 +1,4 @@
 import * as childProcess from "child_process";
-import * as url from "url";
 
 
 export interface Stream {
@@ -12,7 +11,6 @@ export interface Stream {
   fileSize?: number;
   audioBitrate?: number;
   protocol?: string;
-  expire?: Date;
 }
 
 
@@ -65,45 +63,10 @@ export async function getVideoInfo(videoId: string): Promise<VideoInfo> {
         hasVideo: format.vcodec !== "none",
         fileSize: format.filesize ?? undefined,
         audioBitrate: Math.round(format.abr ?? format.tbr),
-        protocol: format.protocol,
-        expire: getExpireDateFromUrl(format.url)
+        protocol: format.protocol
       };
     })
   };
-}
-
-
-function getExpireDateFromUrl(streamUrl: string): Date | undefined {
-  const parsed = new url.URL(streamUrl);
-  if (parsed.hostname === "manifest.googlevideo.com") {
-    const parts = parsed.pathname.split("/").filter(x => x !== "");
-    const expireTs = parts[4];
-    if (!expireTs || isNaN(+expireTs)) {
-      return undefined;
-    }
-
-    return new Date(+expireTs * 1000);
-  } else if (parsed.hostname.endsWith(".googlevideo.com")) {
-    const expireTs = parsed.searchParams.get("expire");
-    if (!expireTs || isNaN(+expireTs)) {
-      return undefined;
-    }
-
-    return new Date(+expireTs * 1000);
-  } else {
-    return undefined;
-  }
-}
-
-
-const ALLOWED_PROTOCOLS = [ "http", "https" ];
-
-
-export async function getStream(videoId: string): Promise<Stream | undefined> {
-  const streamInfo = await getVideoInfo(videoId);
-  const streams = streamInfo.streams.filter(f => !f.hasVideo && f.hasAudio && f.protocol != null && ALLOWED_PROTOCOLS.includes(f.protocol));
-  streams.sort((a, b) => (b.audioBitrate ?? 0) - (a.audioBitrate ?? 0));
-  return streams[0];
 }
 
 
