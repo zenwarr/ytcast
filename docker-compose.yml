@@ -15,6 +15,7 @@ services:
       - SECRETS_DIR=/secrets
       - GOOGLE_API_KEY
       - PUBLIC_DOMAIN
+      - REMOVE_SPONSORBLOCK_CATEGORIES
     labels:
       - "traefik.http.routers.ytcast.rule=Host(\"${PUBLIC_DOMAIN}\")"
       - "traefik.http.services.ytcast.loadbalancer.server.port=8080"
