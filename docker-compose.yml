@@ -5,9 +5,6 @@ services:
     build:
       context: src
     volumes:
-      - type: volume
-        source: yarn_cache
-        target: /yarn-cache
       - ./data/secrets/:/secrets
     restart: unless-stopped
     environment:
@@ -22,9 +19,6 @@ services:
     init: true
     networks:
       - traefik
-
-volumes:
-  yarn_cache:
 
 networks:
   traefik:
