@@ -2,7 +2,7 @@ import * as date from "date-fns";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { getOutput, Stream } from "./youtube_dl";
+import { getOutput } from "./youtube_dl";
 
 
 const DOWNLOADED_CACHE: {
@@ -13,7 +13,19 @@ const DOWNLOADED_CACHE: {
 const CACHE_DIR = os.tmpdir();
 const IGNORE_EXTS = [ ".part" ];
 
-const MAX_CACHE_SIZE = 1024 * 1024 * 1024 * 4; // 4gb
+function getEnvNumber(name: string): number | undefined {
+  const value = process.env[name];
+  if (value) {
+    const n = +value;
+    if (!isNaN(n)) {
+      return n;
+    }
+  }
+
+  return undefined;
+}
+
+const MAX_CACHE_SIZE = getEnvNumber("MAX_CACHE_SIZE") || 1024 * 1024 * 1024 * 4; // 4gb
 const MAX_CACHE_AGE_IN_DAYS = 4;
 
 const REMOVE_SPONSORBLOCK_CATEGORIES: string | undefined = process.env["REMOVE_SPONSORBLOCK_CATEGORIES"];
