@@ -74,7 +74,7 @@ async function downloadEpisodeInternal(episodeId: string): Promise<string | unde
     const downloadFilePath = path.join(CACHE_DIR, `${ episodeId }`) + ".%(ext)s";
     let cmd = `yt-dlp -x --output="${ downloadFilePath }" `;
     if (REMOVE_SPONSORBLOCK_CATEGORIES) {
-      cmd += ` --sponsorblock-remove="${ REMOVE_SPONSORBLOCK_CATEGORIES }" `;
+      cmd += ` --sponsorblock-remove="${ REMOVE_SPONSORBLOCK_CATEGORIES }" --ignore-errors `;
     }
     cmd += ` https://youtube.com/watch?v=${ episodeId }`;
     console.log("downloading episode", cmd);
